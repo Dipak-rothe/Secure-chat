@@ -58,6 +58,33 @@ public class ChatApi {
         return Arrays.asList(users);
     }
 
+    // --- Conversations & Messages ---
+
+    public ConversationModel createOrGetDirectConversation(Long targetUserId) throws ApiException {
+        return client.post("/api/conversations/direct/" + targetUserId, new Object(), ConversationModel.class);
+    }
+
+    public List<ConversationModel> getConversations() throws ApiException {
+        ConversationModel[] convs = client.get("/api/conversations", ConversationModel[].class);
+        if (convs == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(convs);
+    }
+
+    public List<MessageModel> getMessages(Long conversationId) throws ApiException {
+        MessageModel[] msgs = client.get("/api/conversations/" + conversationId + "/messages", MessageModel[].class);
+        if (msgs == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(msgs);
+    }
+
+    public MessageModel sendMessage(Long conversationId, String text) throws ApiException {
+        SendMessageRequest req = new SendMessageRequest(text);
+        return client.post("/api/conversations/" + conversationId + "/messages", req, MessageModel.class);
+    }
+
     public ApiClient getClient() { return client; }
 
     private String urlEncode(String s) {
