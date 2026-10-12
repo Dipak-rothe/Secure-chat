@@ -61,14 +61,17 @@ public class UserSearchDialog extends Stage {
         HBox searchBox = new HBox(8, searchField, searchButton);
         HBox.setHgrow(searchField, Priority.ALWAYS);
 
-        resultsList.setCellFactory(lv -> new ListCell<>() {
+        resultsList.setCellFactory(lv -> new ListCell<UserModel>() {
             @Override
             protected void updateItem(UserModel user, boolean empty) {
                 super.updateItem(user, empty);
                 if (empty || user == null) {
                     setText(null);
+                    setGraphic(null);
                 } else {
-                    setText(user.getName() + " (" + user.getEmail() + ")");
+                    String name = user.getName() != null ? user.getName() : "User";
+                    String email = user.getEmail() != null ? user.getEmail() : "";
+                    setText(name + (!email.isEmpty() ? " (" + email + ")" : ""));
                 }
             }
         });

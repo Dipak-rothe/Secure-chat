@@ -4,6 +4,8 @@ import com.dipak.chatcore.model.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,9 +50,12 @@ public class ChatApi {
         return client.get("/api/users/me", UserModel.class);
     }
 
-    @SuppressWarnings("unchecked")
     public List<UserModel> searchUsers(String query) throws ApiException {
-        return client.get("/api/users/search?q=" + urlEncode(query), List.class);
+        UserModel[] users = client.get("/api/users/search?q=" + urlEncode(query), UserModel[].class);
+        if (users == null) {
+            return Collections.emptyList();
+        }
+        return Arrays.asList(users);
     }
 
     public ApiClient getClient() { return client; }
