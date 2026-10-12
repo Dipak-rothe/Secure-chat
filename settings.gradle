@@ -1,3 +1,11 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
 // Root settings for the Gradle multi-project build.
 // server/ uses Maven independently and is NOT included here.
 rootProject.name = "secure-chat"

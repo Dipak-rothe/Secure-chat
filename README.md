@@ -87,9 +87,9 @@ graph TD
 cd "c:\Users\Dipak.Rothe\Desktop\project-chatting application\secure-chat\server"
 mvn spring-boot:run
 ```
-The server will start on `http://localhost:8080`.
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- Health check: `http://localhost:8080/actuator/health`
+The server will start on `http://localhost:8090`.
+- Swagger UI: `http://localhost:8090/swagger-ui.html`
+- Health check: `http://localhost:8090/actuator/health`
 
 ### Step 2: Run the Windows Desktop App
 ```powershell
@@ -119,8 +119,8 @@ Output will be generated in `desktop\build\dist\SecureChat\SecureChat.exe`.
 # If Android Studio is installed:
 .\gradlew.bat :android:assembleDebug
 ```
-- On Android Emulator: Connects to server via `http://10.0.2.2:8080`.
-- On Physical Phone: Set Server URL to your PC's local LAN IP (e.g. `http://192.168.1.15:8080`).
+- On Android Emulator: Connects to server via `http://10.0.2.2:8090`.
+- On Physical Phone: Set Server URL to your PC's local LAN IP (e.g. `http://192.168.1.15:8090`).
 
 ---
 
@@ -129,7 +129,7 @@ Output will be generated in `desktop\build\dist\SecureChat\SecureChat.exe`.
 | Issue | Cause | Fix |
 |---|---|---|
 | `Connection refused` in Desktop app | Backend server is not running | Run `mvn spring-boot:run` in `server/`. |
-| `Cannot connect from Android phone` | Windows Firewall blocking port 8080 | Add an Inbound Rule in Windows Firewall allowing TCP port 8080. |
+| `Cannot connect from Android phone` | Windows Firewall blocking port 8090 | Add an Inbound Rule in Windows Firewall allowing TCP port 8090. |
 | `jpackage failed` | JDK 21 bin not in PATH | Ensure `C:\Program Files\Java\jdk-21.0.12.1\bin` is in PATH. |
 | `401 Unauthorized` | Invalid or expired credentials | Log in again; refresh tokens rotate automatically. |
 | `Database connection error in production` | MySQL not ready | Ensure Docker containers are running via `docker compose ps`. |

@@ -2,7 +2,7 @@
 
 All REST endpoints reside under the `/api` prefix. Standard JSON request and response envelopes are used throughout.
 
-Base URL: `http://localhost:8080/api` (or configured server host)
+Base URL: `http://localhost:8090/api` (or configured server host)
 
 ---
 

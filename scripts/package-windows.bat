@@ -33,6 +33,7 @@ if "%MAIN_JAR%"=="" (
 )
 
 set "OUTPUT_DIR=desktop\build\dist"
+if exist "%OUTPUT_DIR%\%APP_NAME%" rmdir /s /q "%OUTPUT_DIR%\%APP_NAME%"
 if not exist "%OUTPUT_DIR%" mkdir "%OUTPUT_DIR%"
 
 echo [2/4] Checking for WiX Toolset...

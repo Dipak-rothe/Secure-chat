@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
 
         keyStorage = new SharedPreferencesKeyStorage(this);
-        ApiClient client = new ApiClient("http://10.0.2.2:8080", keyStorage);
+        ApiClient client = new ApiClient("http://10.0.2.2:8090", keyStorage);
         chatApi = new ChatApi(client);
 
         startLiveService();

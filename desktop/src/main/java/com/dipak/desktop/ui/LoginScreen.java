@@ -29,7 +29,7 @@ public class LoginScreen {
     private final ExecutorService executor;
     private final Consumer<ChatApi> onLoginSuccess;
 
-    private final TextField serverUrlField = new TextField("http://localhost:8080");
+    private final TextField serverUrlField = new TextField("http://localhost:8090");
     private final Label errorLabel = new Label();
     private final ProgressIndicator progress = new ProgressIndicator();
 

@@ -9,7 +9,7 @@ Authentication is performed during the handshake using the HTTP `Authorization` 
 
 ```http
 GET /ws HTTP/1.1
-Host: localhost:8080
+Host: localhost:8090
 Upgrade: websocket
 Connection: Upgrade
 Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==

@@ -48,7 +48,7 @@ public class App extends Application {
 
         // Check if existing token exists
         if (keyStorage.get("access_token") != null) {
-            ApiClient client = new ApiClient("http://localhost:8080", keyStorage);
+            ApiClient client = new ApiClient("http://localhost:8090", keyStorage);
             showMainScreen(new ChatApi(client));
         } else {
             showLoginScreen();
