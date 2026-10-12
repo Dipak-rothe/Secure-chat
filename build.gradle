@@ -1,0 +1,17 @@
+// Root build conventions shared across sub-projects.
+// Individual sub-projects apply their own plugins.
+allprojects {
+    group   = "com.dipak"
+    version = "0.1.0"
+
+    repositories {
+        mavenCentral()
+        google()
+    }
+}
+
+subprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = "UTF-8"
+    }
+}

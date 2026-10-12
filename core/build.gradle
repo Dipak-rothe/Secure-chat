@@ -1,0 +1,41 @@
+// Core shared library build.gradle
+// Target Java 11 so the library runs on both JVM (desktop) and Android (minSdk 26).
+// Hard rules: no Java 9+ convenience APIs, no var, no record, no JavaFX, no Android classes.
+
+plugins {
+    id("java-library")
+}
+
+java {
+    // Compile to Java 11 bytecode — compatible with Android (minSdk 26 = OpenJDK 11 subset)
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+// Enforce the release flag for strict cross-compilation (rejects APIs above Java 11)
+tasks.withType(JavaCompile).configureEach {
+    options.release.set(11)
+    options.compilerArgs.addAll(["-Xlint:all", "-Xlint:-processing"])
+    options.encoding = "UTF-8"
+}
+
+dependencies {
+    // HTTP client for REST and WebSocket — works on Android and JVM
+    api("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // JSON serialisation — also works on Android
+    api("com.google.code.gson:gson:2.11.0")
+
+    // Test dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.named("test") {
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = false
+    }
+}

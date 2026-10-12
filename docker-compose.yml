@@ -1,0 +1,42 @@
+# Development Docker Compose — starts MySQL 8 and Redis 7 locally.
+# Run: docker compose up -d
+# Stop: docker compose down
+
+services:
+  mysql:
+    image: mysql:8.0.39
+    container_name: securechat-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: securechat
+      MYSQL_USER: securechat
+      MYSQL_PASSWORD: securechat_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "securechat", "-psecurechat_pass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2.4-alpine
+    container_name: securechat-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis_pass
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_pass", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
+  redis_data:

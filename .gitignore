@@ -1,0 +1,74 @@
+# === Build outputs ===
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# === Gradle ===
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+gradle-app.setting
+.gradletasknamecache
+
+# === Maven ===
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# === IntelliJ IDEA ===
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# === Eclipse ===
+.classpath
+.project
+.settings/
+bin/
+
+# === VS Code ===
+.vscode/
+
+# === Android ===
+local.properties
+*.apk
+*.aab
+*.aar
+android/app/release/
+android/.cxx/
+
+# === Secrets & credentials (never commit these) ===
+*.env
+.env.*
+application-prod.properties
+keystore.jks
+*.keystore
+*.p12
+
+# === SQLite databases ===
+*.db
+*.sqlite
+
+# === macOS ===
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# === Windows ===
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === Logs ===
+logs/
+*.log
+
+# === JavaFX jpackage output ===
+desktop/build/dist/
+desktop/build/installer/

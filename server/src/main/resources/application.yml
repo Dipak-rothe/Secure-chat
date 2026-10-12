@@ -1,0 +1,93 @@
+spring:
+  application:
+    name: securechat-server
+
+  # JPA — always validate against the current Flyway schema
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+
+  # Datasource defaults to H2 for local development / unit tests.
+  # Override with environment variables or application-prod.yml for production.
+  datasource:
+    url: jdbc:h2:mem:securechatdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # Flyway will run migrations on startup
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # Redis defaults (override in prod)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis_pass
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+
+  # Jackson: fail on unknown properties in tests to catch drift early
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+    serialization:
+      write-dates-as-timestamps: false
+
+# JWT settings — override JWT_SECRET in production (min 256-bit key)
+app:
+  jwt:
+    secret: "dev-only-insecure-key-CHANGE-IN-PRODUCTION-use-256bit"
+    access-token-expiry-minutes: 15
+    refresh-token-expiry-days: 7
+
+  # CORS — restrict in production
+  cors:
+    allowed-origins: "*"
+
+  # Rate limiting defaults (tokens per window)
+  rate-limit:
+    login-per-minute: 5
+    message-per-10-seconds: 20
+    search-per-minute: 30
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    root: INFO
+    com.dipak: DEBUG
+    # Never log SQL parameters — they could contain message ciphertext
+    org.hibernate.SQL: WARN
+    org.springframework.security: WARN

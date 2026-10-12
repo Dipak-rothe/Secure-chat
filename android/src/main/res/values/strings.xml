@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">SecureChat</string>
+    <string name="title_sign_in">Sign In</string>
+    <string name="title_register">Create Account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="name">Full Name</string>
+    <string name="server_url">Server URL</string>
+    <string name="sign_in">Sign In</string>
+    <string name="register">Register</string>
+    <string name="dont_have_account">Don\'t have an account? Register</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
+    <string name="new_chat">New Chat</string>
+    <string name="search_users_hint">Search users by name or email...</string>
+    <string name="channel_foreground_service">Live Connection Service</string>
+    <string name="channel_messages">Incoming Messages</string>
+    <string name="foreground_service_active">SecureChat is connected in background</string>
+</resources>

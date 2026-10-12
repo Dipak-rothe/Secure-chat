@@ -1,0 +1,11 @@
+// Root settings for the Gradle multi-project build.
+// server/ uses Maven independently and is NOT included here.
+rootProject.name = "secure-chat"
+
+include(":core")
+include(":desktop")
+include(":android")
+
+project(":core").projectDir    = file("core")
+project(":desktop").projectDir = file("desktop")
+project(":android").projectDir = file("android")
