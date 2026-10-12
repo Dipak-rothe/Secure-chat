@@ -1,3 +1,7 @@
+plugins {
+    id("com.android.application") version "8.5.2" apply false
+}
+
 // Root build conventions shared across sub-projects.
 // Individual sub-projects apply their own plugins.
 allprojects {

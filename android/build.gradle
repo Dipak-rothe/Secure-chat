@@ -1,18 +1,15 @@
 plugins {
-    id("com.android.application") version "8.5.2" apply false
+    id("com.android.application")
 }
-
-// Subproject android configuration
-apply plugin: "com.android.application"
 
 android {
     namespace = "com.dipak.securechat"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.dipak.securechat"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "0.1.0"
 
@@ -23,12 +20,10 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             debuggable = true
-            // Debug allows cleartext HTTP to 10.0.2.2 (Android Emulator host)
             manifestPlaceholders["usesCleartextTraffic"] = "true"
         }
         release {
-            minifyEnabled = true
-            shrinkResources = true
+            minifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             manifestPlaceholders["usesCleartextTraffic"] = "false"
         }
@@ -59,10 +54,6 @@ dependencies {
 
     // AndroidX Security for Keystore & EncryptedSharedPreferences
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
-
-    // Room Database for local offline cache
-    implementation("androidx.room:room-runtime:2.6.1")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
 
     // Testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")

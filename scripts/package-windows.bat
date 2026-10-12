@@ -46,6 +46,14 @@ if %errorlevel% equ 0 (
     goto :RUN_JPACKAGE
 )
 
+set "WIX_BIN=%USERPROFILE%\tools\wix311"
+if exist "%WIX_BIN%\candle.exe" (
+    set "PATH=%WIX_BIN%;%PATH%"
+    set "PACKAGE_TYPE=exe"
+    echo Found WiX v3.11 in tools directory. Packaging as Windows Installer EXE.
+    goto :RUN_JPACKAGE
+)
+
 set "WIX_BIN=%ProgramFiles(x86)%\WiX Toolset v3.11\bin"
 if exist "%WIX_BIN%\candle.exe" (
     set "PATH=%WIX_BIN%;%PATH%"
