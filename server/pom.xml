@@ -67,11 +67,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 for unit tests (no Docker needed) -->
+        <!-- H2 for local dev & tests (no Docker needed) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Flyway -->
