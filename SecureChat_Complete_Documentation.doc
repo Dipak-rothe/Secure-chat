@@ -1,0 +1,168 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>SecureChat - Complete Software Architecture & Operations Guide</title>
+<style>
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; line-height: 1.6; color: #1e1e2e; margin: 40px; }
+  h1 { color: #075E54; border-bottom: 3px solid #075E54; padding-bottom: 8px; font-size: 26pt; }
+  h2 { color: #128C7E; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-top: 28px; font-size: 18pt; }
+  h3 { color: #2c3e50; margin-top: 18px; font-size: 14pt; }
+  code, pre { font-family: Consolas, 'Courier New', monospace; background-color: #f4f6f8; border: 1px solid #dcdcdc; border-radius: 4px; }
+  pre { padding: 12px; overflow-x: auto; font-size: 10pt; }
+  code { padding: 2px 5px; font-size: 10pt; color: #c7254e; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #cbd5e1; padding: 10px 12px; text-align: left; font-size: 10.5pt; }
+  th { background-color: #075E54; color: #ffffff; font-weight: bold; }
+  tr:nth-child(even) { background-color: #f8fafc; }
+  .box { background-color: #e8f5e9; border-left: 5px solid #075E54; padding: 14px; margin: 16px 0; }
+  .warn { background-color: #fff8e1; border-left: 5px solid #ffc107; padding: 14px; margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<h1>SecureChat — Complete Software Architecture, Frontend, Backend &amp; Operations Guide</h1>
+
+<p>
+  <strong>Version:</strong> 0.1.0<br>
+  <strong>Author:</strong> Dipak Rothe<br>
+  <strong>Application Type:</strong> End-to-End Encrypted Cross-Platform Chat System (Windows <code>.exe</code> + Android <code>.apk</code> + Spring Boot Server)<br>
+  <strong>Default Server Port:</strong> <code>8090</code>
+</p>
+
+<div class="box">
+  <strong>Interview Pitch:</strong><br>
+  <em>"SecureChat is a WhatsApp-style cross-platform messaging application for Windows Desktop and Android with end-to-end encryption, stateless JWT authentication with rotating refresh tokens and reuse detection, a shared Java 11 client networking core, and native installers built with JDK 21 jpackage (WiX) and the Android Gradle Plugin."</em>
+</div>
+
+<h2>1. How the Entire System Works (End-to-End Flow)</h2>
+<p>SecureChat consists of <strong>4 main modules</strong> working together inside a single monorepo:</p>
+<ol>
+  <li><strong>Backend Server (<code>server/</code>)</strong>: A Spring Boot 3.3.5 REST &amp; WebSocket server running on port <code>8090</code>. It handles user registration, BCrypt password verification, JWT token issuance, refresh token rotation, user search, direct conversation creation, and encrypted message storage.</li>
+  <li><strong>Shared Core Library (<code>core/</code>)</strong>: A pure Java 11 library used by <em>both</em> the Windows Desktop app and the Android app. It contains <code>ApiClient</code> (OkHttp + Gson) and <code>ChatApi</code>, automatically injecting Bearer JWT tokens and refreshing expired tokens on <code>401 Unauthorized</code>.</li>
+  <li><strong>Windows Desktop Frontend (<code>desktop/</code>)</strong>: A native-packaged JavaFX 21 desktop application (<code>SecureChat-0.1.0.exe</code>). It provides dark/light themes, AES-256-GCM encrypted local token storage, SQLite local caching, user search dialog, and a real-time chat interface with 1-second live polling.</li>
+  <li><strong>Android Mobile Frontend (<code>android/</code>)</strong>: A native Java Android application (<code>android-debug.apk</code>, API 34) using Material 3 UI, Jetpack Security <code>EncryptedSharedPreferences</code> backed by the Android Keystore, Room SQLite cache, and a Foreground Service.</li>
+</ol>
+
+<h2>2. Backend Details (<code>server/</code>)</h2>
+<table>
+  <tr><th>Component</th><th>Technology / Implementation</th><th>Purpose</th></tr>
+  <tr><td>Framework</td><td>Spring Boot 3.3.5 (Java 17)</td><td>Core REST API, Dependency Injection, Actuator, WebSocket</td></tr>
+  <tr><td>Server Port</td><td><code>8090</code></td><td>Configured in <code>server/src/main/resources/application.yml</code></td></tr>
+  <tr><td>Security</td><td>Spring Security 6 + <code>jjwt 0.12.6</code></td><td>Stateless HMAC-SHA256 JWT authentication &amp; BCrypt (cost 12) password hashing</td></tr>
+  <tr><td>Database (Dev)</td><td>H2 File DB (<code>./data/securechatdb.mv.db</code>)</td><td>Persists users, conversations, and messages permanently on disk in MySQL compatibility mode</td></tr>
+  <tr><td>Database (Prod)</td><td>MySQL 8.0 + Redis 7</td><td>Production relational storage + Redis session/pub-sub scaling</td></tr>
+  <tr><td>Schema Migration</td><td>Flyway 10.15 (<code>V1__init.sql</code>)</td><td>Automatically creates and validates all tables on server startup</td></tr>
+  <tr><td>Live Reload</td><td><code>spring-boot-devtools</code></td><td>Automatically restarts server context when backend Java files are recompiled</td></tr>
+  <tr><td>API Docs</td><td>Springdoc OpenAPI 2.6.0 (Swagger UI)</td><td>Interactive API browser at <code>http://localhost:8090/swagger-ui.html</code></td></tr>
+</table>
+
+<h3>Backend REST API Endpoints</h3>
+<table>
+  <tr><th>Method &amp; Path</th><th>Auth Required</th><th>Description</th></tr>
+  <tr><td><code>POST /api/auth/register</code></td><td>Public</td><td>Registers a new user (name, email, password), hashes password with BCrypt, returns JWT access token + refresh token + UserDto.</td></tr>
+  <tr><td><code>POST /api/auth/login</code></td><td>Public</td><td>Authenticates email &amp; password, returns JWT access token + refresh token + UserDto.</td></tr>
+  <tr><td><code>POST /api/auth/refresh</code></td><td>Public</td><td>Rotates refresh token. Detects token reuse and revokes token family if compromised.</td></tr>
+  <tr><td><code>POST /api/auth/logout</code></td><td>Bearer JWT</td><td>Revokes all active refresh tokens for the current user.</td></tr>
+  <tr><td><code>GET /api/users/me</code></td><td>Bearer JWT</td><td>Returns the logged-in user's profile.</td></tr>
+  <tr><td><code>GET /api/users/search?q=...</code></td><td>Bearer JWT</td><td>Searches registered users by name or email prefix (2 to 10 characters).</td></tr>
+  <tr><td><code>PUT /api/users/me/keys</code></td><td>Bearer JWT</td><td>Uploads the user's public EC key and encrypted private key backup.</td></tr>
+  <tr><td><code>GET /api/users/{id}/keys</code></td><td>Bearer JWT</td><td>Fetches another user's public key bundle for E2E encryption.</td></tr>
+  <tr><td><code>POST /api/conversations/direct/{targetUserId}</code></td><td>Bearer JWT</td><td>Gets or creates a unique 1-to-1 direct conversation between current user and target user.</td></tr>
+  <tr><td><code>GET /api/conversations</code></td><td>Bearer JWT</td><td>Returns all conversations the current user is a member of.</td></tr>
+  <tr><td><code>POST /api/conversations/{id}/messages</code></td><td>Bearer JWT</td><td>Sends a message in the specified conversation.</td></tr>
+  <tr><td><code>GET /api/conversations/{id}/messages</code></td><td>Bearer JWT</td><td>Returns all messages in the conversation ordered chronologically.</td></tr>
+</table>
+
+<h2>3. Frontend Details</h2>
+
+<h3>A. Shared Core Library (<code>core/</code>)</h3>
+<ul>
+  <li><strong><code>ApiClient.java</code></strong>: Wraps OkHttp 4.12.0. Forces <code>Protocol.HTTP_1_1</code> and injects <code>X-Pinggy-No-Screen: true</code> so reverse tunnels (like Pinggy) never drop streams or show browser interstitial pages. Automatically intercepts <code>401 Unauthorized</code> responses, synchronizes on a lock, refreshes the JWT using the stored refresh token, and retries the request.</li>
+  <li><strong><code>ChatApi.java</code></strong>: Provides clean Java methods for login, registration, user search, conversation creation, and message sending/receiving.</li>
+</ul>
+
+<h3>B. Windows Desktop Application (<code>desktop/</code>)</h3>
+<ul>
+  <li><strong><code>Launcher.java</code> &amp; <code>App.java</code></strong>: Boots the JavaFX 21 runtime, initializes encrypted storage (<code>~/.securechat/keys.enc</code>) and SQLite cache (<code>~/.securechat/cache.db</code>), and manages Dark/Light CSS themes (<code>dark.css</code>, <code>light.css</code>).</li>
+  <li><strong><code>LoginScreen.java</code></strong>: Allows configuring the <strong>Server URL</strong> (e.g., <code>http://localhost:8090</code> on PC 1, or a tunnel/LAN URL on PC 2) and switching between <strong>Sign In</strong> and <strong>Register</strong> tabs.</li>
+  <li><strong><code>UserSearchDialog.java</code></strong>: Modal window opened via <strong>+ New Chat</strong>. Searches users on a background thread and displays <code>Name (email)</code>.</li>
+  <li><strong><code>MainScreen.java</code></strong>: Full split-pane chat interface:
+    <ul>
+      <li><strong>Left Sidebar</strong>: Current user header, <code>+ New Chat</code>, <code>Toggle Theme</code>, <code>Log Out</code>, and active conversations list.</li>
+      <li><strong>Center Chat Area</strong>: Contact header with <em>End-to-End Encrypted</em> badge, scrollable message bubble list (blue bubbles on the right for sent messages, dark slate bubbles on the left for received messages), and bottom message input bar with <strong>Send</strong> button.</li>
+      <li><strong>Real-Time Auto-Refresh</strong>: Background poller fetches new messages every 1 second so messages sent from one PC appear live on the other PC.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>C. Android Application (<code>android/</code>)</h3>
+<ul>
+  <li><strong><code>LoginActivity.java</code> &amp; <code>MainActivity.java</code></strong>: Material 3 activities for signing in, searching users, and toggling themes.</li>
+  <li><strong><code>AndroidKeystoreStorage.java</code></strong>: Hardware-backed <code>EncryptedSharedPreferences</code> (AES-256-GCM) for storing JWT tokens securely on Android.</li>
+  <li><strong><code>RoomLocalStore.java</code></strong>: SQLite database persistence for offline user profile access.</li>
+  <li><strong><code>ChatForegroundService.java</code></strong>: Android Foreground Service keeping the chat connection active.</li>
+</ul>
+
+<h2>4. Step-by-Step Guide: How to Run the Software</h2>
+
+<h3>Method 1: One-Click Live Runner (Fastest for Development &amp; Real-Time Code Changes)</h3>
+<p>Double-click <strong><code>run-live.bat</code></strong> located at:</p>
+<pre>C:\Users\Dipak.Rothe\Desktop\project-chatting application\secure-chat\run-live.bat</pre>
+<ol>
+  <li>It checks if the backend server is running on port <code>8090</code>; if not, it automatically launches <code>mvn spring-boot:run</code> in a new window.</li>
+  <li>It optionally starts the public Pinggy tunnel for connecting a second PC.</li>
+  <li>It compiles and opens the Desktop client directly from source code (<code>gradlew.bat :desktop:run</code>).</li>
+  <li>Whenever you edit any Java/CSS file in <code>core/</code> or <code>desktop/</code>, simply close the app window and press <strong>Enter</strong> in the terminal to recompile and relaunch in 2–3 seconds!</li>
+</ol>
+
+<h3>Method 2: Running Manually via Terminal</h3>
+<p><strong>1. Start the Backend Server:</strong></p>
+<pre>cd "C:\Users\Dipak.Rothe\Desktop\project-chatting application\secure-chat\server"
+mvn spring-boot:run</pre>
+
+<p><strong>2. Start the Desktop App:</strong></p>
+<pre>cd "C:\Users\Dipak.Rothe\Desktop\project-chatting application\secure-chat"
+.\gradlew.bat :desktop:run</pre>
+
+<h2>5. How to Connect &amp; Chat Between Two Different PCs</h2>
+
+<h3>Step 1: Ensure Backend Server is Running on PC 1</h3>
+<p>Start the server on PC 1 (port <code>8090</code>) using <code>run-live.bat</code> or <code>mvn spring-boot:run</code>.</p>
+
+<h3>Step 2: Expose PC 1's Server to PC 2</h3>
+<ul>
+  <li><strong>Option A — Public Tunnel (Works across any network/firewall without Admin rights):</strong><br>
+    Open PowerShell on PC 1 and run:
+    <pre>ssh -p 443 -R 80:localhost:8090 a.pinggy.io</pre>
+    Copy the generated HTTPS URL (for example: <code>https://xxxx.free.pinggy.net</code>).
+  </li>
+  <li><strong>Option B — Same Wi-Fi / Mobile Hotspot (Direct LAN):</strong><br>
+    Connect both PCs to the same Wi-Fi or phone hotspot, run <code>ipconfig</code> on PC 1 to find its IPv4 address (e.g. <code>10.10.104.98</code>), and use <code>http://10.10.104.98:8090</code>.
+  </li>
+</ul>
+
+<h3>Step 3: Log In &amp; Chat</h3>
+<ol>
+  <li><strong>On PC 1</strong>: Open SecureChat, set Server URL to <code>http://localhost:8090</code>, and sign in as <code>drothe619@gmail.com</code> (Password: <code>password123</code>).</li>
+  <li><strong>On PC 2</strong>: Install and open <code>SecureChat-0.1.0.exe</code>, set Server URL to the tunnel URL (<code>https://xxxx.free.pinggy.net</code>), and sign in as <code>snehavjaiswal12@gmail.com</code> (Password: <code>password123</code>).</li>
+  <li>Click <strong>+ New Chat</strong>, search for <code>sneha</code> (or <code>Dipak</code>), select the user in the list, and click <strong>Start Chat</strong>.</li>
+  <li>Type a message at the bottom and press <strong>Send</strong> (or <strong>Enter</strong>) — messages appear live on both PCs!</li>
+</ol>
+
+<h2>6. Generated Installer Locations &amp; Build Commands</h2>
+<table>
+  <tr><th>Platform</th><th>File Location</th><th>Command to Rebuild</th></tr>
+  <tr>
+    <td><strong>Windows Installer (<code>.exe</code>)</strong></td>
+    <td><code>C:\Users\Dipak.Rothe\Desktop\project-chatting application\secure-chat\desktop\build\dist\SecureChat-0.1.0.exe</code></td>
+    <td><code>scripts\package-windows.bat</code></td>
+  </tr>
+  <tr>
+    <td><strong>Android Package (<code>.apk</code>)</strong></td>
+    <td><code>C:\Users\Dipak.Rothe\Desktop\project-chatting application\secure-chat\android\build\outputs\apk\debug\android-debug.apk</code></td>
+    <td><code>.\gradlew.bat :android:assembleDebug</code></td>
+  </tr>
+</table>
+
+</body>
+</html>
