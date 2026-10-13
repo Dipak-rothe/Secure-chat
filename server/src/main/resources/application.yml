@@ -15,7 +15,7 @@ spring:
   # Datasource defaults to H2 for local development / unit tests.
   # Override with environment variables or application-prod.yml for production.
   datasource:
-    url: jdbc:h2:mem:securechatdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    url: jdbc:h2:file:./data/securechatdb;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE;MODE=MySQL;NON_KEYWORDS=TYPE,KEY,VALUE
     driver-class-name: org.h2.Driver
     username: sa
     password:

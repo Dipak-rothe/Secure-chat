@@ -50,9 +50,10 @@ keystore.jks
 *.keystore
 *.p12
 
-# === SQLite databases ===
+# === SQLite & H2 databases ===
 *.db
 *.sqlite
+server/data/
 
 # === macOS ===
 .DS_Store
