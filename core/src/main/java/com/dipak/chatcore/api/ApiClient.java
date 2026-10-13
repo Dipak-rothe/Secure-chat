@@ -40,6 +40,8 @@ public class ApiClient {
         this.keyStorage = keyStorage;
         this.gson = new Gson();
         this.http = new OkHttpClient.Builder()
+                .protocols(java.util.Collections.singletonList(Protocol.HTTP_1_1))
+                .retryOnConnectionFailure(true)
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(30, TimeUnit.SECONDS)
@@ -83,6 +85,7 @@ public class ApiClient {
         RequestBody requestBody = RequestBody.create(gson.toJson(body), JSON);
         Request request = new Request.Builder()
                 .url(baseUrl + path)
+                .header("X-Pinggy-No-Screen", "true")
                 .post(requestBody)
                 .build();
         return execute(request, responseType);
@@ -114,7 +117,9 @@ public class ApiClient {
 
     private Request.Builder buildRequest(String path) {
         String token = keyStorage.get(KEY_ACCESS_TOKEN);
-        Request.Builder builder = new Request.Builder().url(baseUrl + path);
+        Request.Builder builder = new Request.Builder()
+                .url(baseUrl + path)
+                .header("X-Pinggy-No-Screen", "true");
         if (token != null && !token.isEmpty()) {
             builder.header("Authorization", "Bearer " + token);
         }
